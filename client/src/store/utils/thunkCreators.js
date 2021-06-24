@@ -5,6 +5,7 @@ import {
   addConversation,
   setNewMessage,
   setSearchedUsers,
+  readUnreadMessages,
 } from "../conversations";
 import { gotUser, setFetchingStatus } from "../user";
 
@@ -78,10 +79,21 @@ export const fetchConversations = () => async (dispatch) => {
   }
 };
 
+export const readConversationMessages = (conversation) => async (dispatch) => {
+  try {
+    const { data } = await axios.put(`/api/conversations/${conversation.id}`);
+    console.log('action datat', data)
+    dispatch(readUnreadMessages(data));
+  } catch (error) {
+    console.error(error);
+  }
+};
+
 const saveMessage = async (body) => {
   const { data } = await axios.post("/api/messages", body);
   return data;
 };
+
 
 const sendMessage = (data, body) => {
   socket.emit("new-message", {
@@ -104,6 +116,8 @@ export const postMessage = (body) => async (dispatch) => {
     }
 
     sendMessage(data, body);
+    // update unread message count; if already active, set to 0
+
   } catch (error) {
     console.error(error);
   }

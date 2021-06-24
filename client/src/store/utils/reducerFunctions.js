@@ -16,8 +16,21 @@ export const addMessageToStore = (state, payload) => {
       const convoCopy = { ...convo };
       convoCopy.messages.push(message);
       convoCopy.latestMessageText = message.text;
-
       return convoCopy;
+    } else {
+      return convo;
+    }
+  });
+};
+
+// added thunk to reset unread message count on conversation state
+export const updateUnreadInStore = (state, payload) => {
+  const conversation = payload;
+  console.log('updateUnreadInStore > Convo', conversation)
+  console.log('updateUnreadInStore > Convo ID', conversation.id)
+  return state.map((convo) => {
+    if (convo.id === conversation.id) {
+      return conversation;
     } else {
       return convo;
     }
@@ -75,6 +88,8 @@ export const addNewConvoToStore = (state, recipientId, message) => {
       newConvo.id = message.conversationId;
       newConvo.messages.push(message);
       newConvo.latestMessageText = message.text;
+      newConvo.unread = newConvo.messages.length; // added
+      console.log('add new convo', newConvo)
       return newConvo;
     } else {
       return convo;
