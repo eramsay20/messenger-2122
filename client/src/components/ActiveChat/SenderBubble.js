@@ -24,18 +24,30 @@ const useStyles = makeStyles(() => ({
   bubble: {
     background: "#F4F6FA",
     borderRadius: "10px 10px 0 10px"
-  }
+  },
+  profile: {
+    height: "25px",
+    width: "25px",
+    borderRadius: "50%",
+    padding: "3px",
+  },
 }));
 
 const SenderBubble = (props) => {
   const classes = useStyles();
-  const { time, text } = props;
+  const { time, text, last, otherProfile, unread } = props;
+  console.log(unread, last)
   return (
     <Box className={classes.root}>
       <Typography className={classes.date}>{time}</Typography>
       <Box className={classes.bubble}>
         <Typography className={classes.text}>{text}</Typography>
       </Box>
+      { last && unread===0 &&
+        <div>
+        <img className={classes.profile} src={otherProfile}></img>
+      </div>
+      }
     </Box>
   );
 };

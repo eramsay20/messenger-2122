@@ -19,3 +19,6 @@ yarn-debug.log*
 yarn-error.log*
 
 server/.env
+package-lock.json
+
+server/db/db.js

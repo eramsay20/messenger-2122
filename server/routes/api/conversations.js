@@ -88,9 +88,9 @@ router.put("/:id", async (req, res, next) => {
     const conversationId = req.params.id;
     const conversation = await Conversation.findByPk( conversationId, {
       attributes: ["id"],
-      order: [[Message, "createdAt", "DESC"]],
+      order: [[Message, "createdAt", "ASC"]],
       include: [
-        { model: Message, order: ["createdAt", "DESC"] },
+        { model: Message, order: ["createdAt", "ASC"] },
         {
           model: User,
           as: "user1",

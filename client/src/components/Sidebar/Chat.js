@@ -18,6 +18,21 @@ const styles = {
       cursor: "grab",
     },
   },
+  unread: {
+    height: "30px",
+    width: "30px",
+    color: "white",
+    fontWeight: "bold",
+    backgroundColor: "#3A8DFF",
+    borderRadius: "50%",
+    display: "flex",
+    justifyContent: 'center',
+    alignItems:'center',
+    marginRight: '10px',
+  },
+  hidden: {
+    display: 'none'
+  }
 };
 
 class Chat extends Component {
@@ -32,8 +47,8 @@ class Chat extends Component {
   render() {
     const { classes } = this.props;
     const otherUser = this.props.conversation.otherUser;
-    const unreadCount = this.props.conversation.messages.filter(message => message.unread).length;
-  
+    const unreadCount = this.props.conversation.messages.filter(message => message.senderId !== this.props.user.id && message.unread).length;
+    console.log(this.props)
     return (
       <Box
         onClick={() => this.handleClick(this.props.conversation)}
@@ -46,11 +61,21 @@ class Chat extends Component {
           sidebar={true}
         />
         <ChatContent conversation={this.props.conversation} />
-        <div>{unreadCount}</div>
+        { this.props.conversation.otherUser.username !== this.props.activeConversation &&
+        <div className={`${classes.unread} ${(unreadCount === 0 ? classes.hidden : null)}`}>{unreadCount}</div>
+        }
       </Box>
     );
   }
 }
+
+const mapStateToProps = (state) => {
+  return {
+    activeConversation: state.activeConversation,
+    user: state.user,
+  };
+};
+
 
 const mapDispatchToProps = (dispatch) => {
   return {
@@ -63,4 +88,4 @@ const mapDispatchToProps = (dispatch) => {
   };
 };
 
-export default connect(null, mapDispatchToProps)(withStyles(styles)(Chat));
+export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(Chat));
