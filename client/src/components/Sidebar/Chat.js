@@ -37,18 +37,24 @@ const styles = {
 
 class Chat extends Component {
   handleClick = async (conversation) => {
-    console.log('chat convo handle click', conversation)
+    // set clicked on window as active chat
     await this.props.setActiveChat(conversation.otherUser.username);
+
+    // before opening and marking a new chat as read,
+    // identify the last convo and run cleanup on last active convo to mark all messages 
+    // that came through while the window was set to active as "read" 
+    const lastConvo =  this.props.conversations.filter(convo => convo.id === conversation.lastActiveConvo)
+    if(lastConvo.length) await this.props.readConversationMessages(lastConvo[0])
     
-    // when chat is selected and set to active, reset unread count for the convo
+    // when chat is selected and set to active, reset unread count for the newly selected convo
     await this.props.readConversationMessages(conversation)
   };
 
   render() {
     const { classes } = this.props;
     const otherUser = this.props.conversation.otherUser;
-    const unreadCount = this.props.conversation.messages.filter(message => message.senderId !== this.props.user.id && message.unread).length;
-    console.log(this.props)
+    const unreadCount = this.props.conversation.messages.filter(message => message.senderId === otherUser.id && message.unread).length;
+    
     return (
       <Box
         onClick={() => this.handleClick(this.props.conversation)}
@@ -71,6 +77,7 @@ class Chat extends Component {
 
 const mapStateToProps = (state) => {
   return {
+    conversations: state.conversations,
     activeConversation: state.activeConversation,
     user: state.user,
   };

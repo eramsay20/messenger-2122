@@ -4,28 +4,31 @@ import { SenderBubble, OtherUserBubble } from "../ActiveChat";
 import moment from "moment";
 
 const Messages = (props) => {
- const { messages, otherUser, userId } = props;
+  const { messages, otherUser, userId } = props;
   const [senderMessages, setSenderMessages] = useState(messages.filter(msg => msg.senderId === userId))
-  const [unread, setUnread] = useState(messages)
+  const [unreadCount, setUnreadCount] = useState(messages.filter(msg => msg.unread && msg.senderId === userId).length)
+  console.log(unreadCount)
 
   useEffect(() => {
     setSenderMessages(props.messages.filter(msg => msg.senderId === userId));
-    setUnread(props.messages.filter(msg => msg.unread && msg.senderId === userId).length)
+    setUnreadCount(props.messages.filter(msg => msg.unread && msg.senderId === userId).length)
   }, [props])
-  console.log(messages)
+
   return (
     <Box>
-      {messages && messages.map((message) => {
+      {senderMessages && messages.map((message) => {
         const time = moment(message.createdAt).format("h:mm");
         return message.senderId === userId ? (
-          <>
+          <> { senderMessages.length > 0 && 
             <SenderBubble 
-              unread={unread} 
-              otherProfile={otherUser.photoUrl} 
-              last={message.id === senderMessages[senderMessages.length-1].id} 
               key={message.id} 
+              otherProfile={otherUser.photoUrl} 
+              unreadCount={unreadCount}
+              lastId={senderMessages[senderMessages.length-1-unreadCount].id}
+              messageId = {message.id}
               text={message.text} 
               time={time} />
+            }
             </>
         ) : (
           <OtherUserBubble key={message.id} text={message.text} time={time} otherUser={otherUser} />

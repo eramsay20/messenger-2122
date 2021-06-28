@@ -23,19 +23,23 @@ export const addMessageToStore = (state, payload) => {
   });
 };
 
-// added thunk to reset unread message count on conversation state
+// added thunk to reset unread message count on conversation state and add property to ID last active chat
 export const updateUnreadInStore = (state, payload) => {
   const conversation = payload;
-  console.log('updateUnreadInStore > Convo', conversation)
-  console.log('updateUnreadInStore > Convo ID', conversation.id)
+
   return state.map((convo) => {
     if (convo.id === conversation.id) {
-      return conversation;
+      const updatedConvo = conversation;
+      updatedConvo.lastActiveConvo = conversation.id
+      return updatedConvo;
     } else {
-      return convo;
+      const convoCopy = { ...convo };
+      convoCopy.lastActiveConvo = conversation.id
+      return convoCopy;
     }
   });
 };
+
 
 export const addOnlineUserToStore = (state, id) => {
   return state.map((convo) => {

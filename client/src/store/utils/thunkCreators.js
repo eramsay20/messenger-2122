@@ -79,10 +79,12 @@ export const fetchConversations = () => async (dispatch) => {
   }
 };
 
+// thunk to update DB so that all message in given convo are marked as read
 export const readConversationMessages = (conversation) => async (dispatch) => {
   try {
     const { data } = await axios.put(`/api/conversations/${conversation.id}`);
-    console.log('action datat', data)
+
+    // dispatch action creator to pass the updated convo that returns into fronend state
     dispatch(readUnreadMessages(data));
   } catch (error) {
     console.error(error);
@@ -114,10 +116,9 @@ export const postMessage = (body) => async (dispatch) => {
     } else {
       dispatch(setNewMessage(data.message));
     }
-
+    
     sendMessage(data, body);
-    // update unread message count; if already active, set to 0
-
+    
   } catch (error) {
     console.error(error);
   }
