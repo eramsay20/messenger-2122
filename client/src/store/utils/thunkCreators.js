@@ -82,10 +82,12 @@ export const fetchConversations = () => async (dispatch) => {
 // thunk to update DB so that all message in given convo are marked as read
 export const readConversationMessages = (conversation) => async (dispatch) => {
   try {
+    if(conversation.id){
     const { data } = await axios.put(`/api/conversations/${conversation.id}`);
 
     // dispatch action creator to pass the updated convo that returns into fronend state
     dispatch(readUnreadMessages(data));
+    }
   } catch (error) {
     console.error(error);
   }
