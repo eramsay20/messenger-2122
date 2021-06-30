@@ -92,8 +92,7 @@ export const addNewConvoToStore = (state, recipientId, message) => {
       newConvo.id = message.conversationId;
       newConvo.messages.push(message);
       newConvo.latestMessageText = message.text;
-      newConvo.unread = newConvo.messages.length; // added
-      console.log('add new convo', newConvo)
+      newConvo.unread = newConvo.messages.length;
       return newConvo;
     } else {
       return convo;
