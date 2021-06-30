@@ -2,40 +2,50 @@ import React, {useState, useEffect} from "react";
 import { Box } from "@material-ui/core";
 import { SenderBubble, OtherUserBubble } from "../ActiveChat";
 import { readConversationMessages } from "../../store/utils/thunkCreators";
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import moment from "moment";
 
 const Messages = (props) => {
   const dispatch = useDispatch()
   const { messages, otherUser, userId } = props;
   
-  const [senderMessages, setSenderMessages] = useState(messages)
-  const [otherUserMessages, setOtherUserMessages] = useState(messages)
-  const [unreadMessageCount, setUnreadMessageCount] = useState(0)
-  const [lastId, setLastId] = useState(null)
+  const [senderMessages, setSenderMessages] = useState(messages.filter(msg => msg.senderId === userId))
+  const [otherUserMessages, setOtherUserMessages] = useState(messages.filter(msg => msg.senderId !== userId))
+  const [unreadSenderMessageCount, setUnreadSenderMessageCount] = useState(0)
+  const [lastSenderMessageId, setLastSenderMessageId] = useState(null)
+  const activeChat = useSelector(state => state.activeConversation)
+  
+  useEffect(() => {
+    // when new active chat opened, mark msgs as read
+    if (activeChat && activeChat === props.otherUser.username) dispatch(readConversationMessages(props.conversation))
 
-  // reset sender mgs, otherUser msg and unread msg count whenever props changes
+    // when navigating away to new chat window on unmount, mark all msgs from open window as read
+    return () => dispatch(readConversationMessages(props.conversation))
+  }, [activeChat])
+
+
+  // Update sender && otherUser msg arrays as well as the unread msg count whenever props changes
   useEffect(() => {
     setSenderMessages(props.messages.filter(msg => msg.senderId === userId));
     setOtherUserMessages(props.messages.filter(msg => msg.senderId !== userId));
   }, [props, userId])
 
-  // After senderMessages filters and saves in useState, count the number of unread sender msgs and
-  // if there's at least 1 message thats been read, set the id of the 'last' read msg so the 
-  // SenderBubble knows where to show the 'last read msg' icon
-  useEffect(() => {
-    if(senderMessages.length) setUnreadMessageCount(senderMessages.filter(msg => msg.unread).length)
-    if (unreadMessageCount < senderMessages.length) {
-      setLastId(senderMessages[senderMessages.length - 1 - unreadMessageCount].id)
-    }
-  }, [senderMessages, unreadMessageCount])
 
-  
-  // when both users have their convo in ActiveChat, we'll want to update 'read' messages
-  // whenever the otherUser in the convo posts a new message so we can update the last read msg icon placement
+  // Whenever the other user replies in an active chat increasing the length of the otherUserMessages 
+  // mark messages a read to update placement of last read profile icon
   useEffect(() => {
     dispatch(readConversationMessages(props.conversation))
   }, [otherUserMessages.length])
+
+  // When senderMessages array changes, count the number of unread senderMessages
+  // While the count of unread msgs is less than the count of all sender messages, set the id of the 'last' read sender msg
+  // Feed the last read sender msg id to SenderBubble child component to know where to set the 'last read msg' profile icon
+  useEffect(() => {
+    if(senderMessages.length) setUnreadSenderMessageCount(senderMessages.filter(msg => msg.unread).length)
+    if(unreadSenderMessageCount < senderMessages.length) {
+      setLastSenderMessageId(senderMessages[senderMessages.length - 1 - unreadSenderMessageCount].id)
+    }
+  }, [senderMessages, unreadSenderMessageCount])
 
   return (
     <Box>
@@ -46,8 +56,8 @@ const Messages = (props) => {
             <SenderBubble 
               key={message.id} 
               otherProfile={otherUser.photoUrl} 
-              unreadCount={unreadMessageCount}
-              lastId={lastId}
+              unreadCount={unreadSenderMessageCount}
+              lastId={lastSenderMessageId}
               messageId = {message.id}
               text={message.text} 
               time={time} />

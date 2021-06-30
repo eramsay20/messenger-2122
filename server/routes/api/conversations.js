@@ -118,9 +118,13 @@ router.put("/:id", async (req, res, next) => {
 
     if(conversation){
       let messages = conversation.messages;
+      
       for (let i = 0; i < messages.length; i++) {
-        const message = messages[i];
-        message.unread = false;
+        let message = messages[i];
+        if (message.dataValues.senderId !== userId) {
+          // set all otherUser messages status to read
+          message.unread = false;
+        }
         await message.save()
       }
       await conversation.save()
