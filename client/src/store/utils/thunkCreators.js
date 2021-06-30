@@ -5,6 +5,7 @@ import {
   addConversation,
   setNewMessage,
   setSearchedUsers,
+  readUnreadMessages,
 } from "../conversations";
 import { gotUser, setFetchingStatus } from "../user";
 
@@ -78,10 +79,25 @@ export const fetchConversations = () => async (dispatch) => {
   }
 };
 
+// thunk to update DB so that all message in given convo are marked as read
+export const readConversationMessages = (conversation) => async (dispatch) => {
+  try {
+    if(conversation.id){
+    const { data } = await axios.put(`/api/conversations/${conversation.id}`);
+
+    // dispatch action creator to pass the updated convo that returns into fronend state
+    dispatch(readUnreadMessages(data));
+    }
+  } catch (error) {
+    console.error(error);
+  }
+};
+
 const saveMessage = async (body) => {
   const { data } = await axios.post("/api/messages", body);
   return data;
 };
+
 
 const sendMessage = (data, body) => {
   socket.emit("new-message", {
@@ -102,8 +118,9 @@ export const postMessage = (body) => async (dispatch) => {
     } else {
       dispatch(setNewMessage(data.message));
     }
-
+    
     sendMessage(data, body);
+    
   } catch (error) {
     console.error(error);
   }
