@@ -45,7 +45,7 @@ const SenderBubble = (props) => {
       </Box>
       { lastId === messageId &&
         <div>
-        <img className={classes.profile} src={otherProfile}></img>
+        <img alt='otherUserProfileImg' className={classes.profile} src={otherProfile}></img>
       </div>
       }
     </Box>

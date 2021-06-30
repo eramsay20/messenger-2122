@@ -7,7 +7,7 @@ import moment from "moment";
 
 const Messages = (props) => {
   const dispatch = useDispatch()
-  const { messages, otherUser, userId } = props;
+  const { messages, otherUser, userId, conversation } = props;
   
   const [senderMessages, setSenderMessages] = useState(messages.filter(msg => msg.senderId === userId))
   const [otherUserMessages, setOtherUserMessages] = useState(messages.filter(msg => msg.senderId !== userId))
@@ -15,12 +15,11 @@ const Messages = (props) => {
   const [lastSenderMessageId, setLastSenderMessageId] = useState(null)
   const activeChat = useSelector(state => state.activeConversation)
   
+  // When new active chat opened, mark msgs as read
+  // When navigating away to new chat window on unmount, mark all msgs from open window as read
   useEffect(() => {
-    // when new active chat opened, mark msgs as read
-    if (activeChat && activeChat === props.otherUser.username) dispatch(readConversationMessages(props.conversation))
-
-    // when navigating away to new chat window on unmount, mark all msgs from open window as read
-    return () => dispatch(readConversationMessages(props.conversation))
+    if (activeChat && activeChat === props.otherUser.username) dispatch(readConversationMessages(conversation))
+    return () => dispatch(readConversationMessages(conversation))
   }, [activeChat])
 
 
@@ -34,7 +33,7 @@ const Messages = (props) => {
   // Whenever the other user replies in an active chat increasing the length of the otherUserMessages 
   // mark messages a read to update placement of last read profile icon
   useEffect(() => {
-    dispatch(readConversationMessages(props.conversation))
+    dispatch(readConversationMessages(conversation))
   }, [otherUserMessages.length])
 
   // When senderMessages array changes, count the number of unread senderMessages
