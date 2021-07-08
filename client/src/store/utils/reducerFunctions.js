@@ -1,6 +1,8 @@
 export const addMessageToStore = (state, payload) => {
   const { message, recipientId, sender } = payload;
-  // if sender isn't null, that means the message needs to be put in a brand new convo
+
+  // if sender isn't null, that means the message needs to be added to 
+  // the 'fake convo' created by the addSearchedUsersToStore() reducer function
   if (sender !== null) {
     return state.map((convo) => {
     if (convo.otherUser.id === recipientId) {
