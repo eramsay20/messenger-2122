@@ -2,7 +2,7 @@ import axios from "axios";
 import socket from "../../socket";
 import {
   gotConversations,
-  addConversation,
+  // addConversation,
   setNewMessage,
   setSearchedUsers,
   readUnreadMessages,
@@ -113,12 +113,10 @@ export const postMessage = (body) => async (dispatch) => {
   try {
     const data = await saveMessage(body);
 
-    if (!body.conversationId) {
-      dispatch(addConversation(body.recipientId, data.message));
-    } else {
-      dispatch(setNewMessage(data.message));
-    }
+    // update local state for sender once message is saved in db
+    dispatch(setNewMessage(data.message, body.recipientId, data.sender));
     
+    // emit updates to intended msg recipient via websocket
     sendMessage(data, body);
     
   } catch (error) {
