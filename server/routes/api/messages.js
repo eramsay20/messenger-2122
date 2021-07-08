@@ -16,7 +16,7 @@ router.post("/", async (req, res, next) => {
 
     if(conversation){
       // if req.user not a member of the conversation, return 403 early
-      if (!(conversation.user1Id === senderId) && !(conversation.user2Id === senderId)) return res.sendStatus(403);
+      if (conversation.user1Id !== senderId && conversation.user2Id !== senderId) return res.sendStatus(403);
 
       const message = await Message.create({
         senderId,
