@@ -2,7 +2,6 @@ import axios from "axios";
 import socket from "../../socket";
 import {
   gotConversations,
-  // addConversation,
   setNewMessage,
   setSearchedUsers,
   readUnreadMessages,

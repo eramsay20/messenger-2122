@@ -43,7 +43,7 @@ io.on("connection", (socket) => {
 
   socket.on("new-message", (data) => {
     const { message, recipientId, sender} = data;
-    console.log('www', message, recipientId, sender);
+  
     socket.to(`user-${recipientId}`).emit("new-message", {
       message: message,
       sender: sender,
