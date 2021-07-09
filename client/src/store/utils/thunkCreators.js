@@ -1,5 +1,5 @@
 import axios from "axios";
-import socket from "../../socket";
+import socket, { initNewSocket } from "../../socket";
 import {
   gotConversations,
   setNewMessage,
@@ -15,6 +15,8 @@ axios.interceptors.request.use(async function (config) {
   return config;
 });
 
+let userSocket = socket;
+
 // USER THUNK CREATORS
 
 export const fetchUser = () => async (dispatch) => {
@@ -23,7 +25,7 @@ export const fetchUser = () => async (dispatch) => {
     const { data } = await axios.get("/auth/user");
     dispatch(gotUser(data));
     if (data.id) {
-      socket.emit("go-online", data.id);
+      userSocket.emit("go-online", data.id);
     }
   } catch (error) {
     console.error(error);
@@ -37,7 +39,10 @@ export const register = (credentials) => async (dispatch) => {
     const { data } = await axios.post("/auth/register", credentials);
     await localStorage.setItem("messenger-token", data.token);
     dispatch(gotUser(data));
-    socket.emit("go-online", data.id);
+
+    userSocket = initNewSocket()
+    userSocket.emit("go-online", data.id);
+
   } catch (error) {
     console.error(error);
     dispatch(gotUser({ error: error.response.data.error || "Server Error" }));
@@ -49,7 +54,12 @@ export const login = (credentials) => async (dispatch) => {
     const { data } = await axios.post("/auth/login", credentials);
     await localStorage.setItem("messenger-token", data.token);
     dispatch(gotUser(data));
-    socket.emit("go-online", data.id);
+
+    // default socket from splash page missing messenger-token if not already cached
+    // need to init new socket on successful login / registration before any other emits
+    userSocket = initNewSocket()
+    userSocket.emit("go-online", data.id);
+    
   } catch (error) {
     console.error(error);
     dispatch(gotUser({ error: error.response.data.error || "Server Error" }));
@@ -61,7 +71,7 @@ export const logout = (id) => async (dispatch) => {
     await axios.delete("/auth/logout");
     await localStorage.removeItem("messenger-token");
     dispatch(gotUser({}));
-    socket.emit("logout", id);
+    userSocket.emit("logout", id);
   } catch (error) {
     console.error(error);
   }
@@ -99,7 +109,7 @@ const saveMessage = async (body) => {
 
 
 const sendMessage = (data, body) => {
-  socket.emit("new-message", {
+  userSocket.emit("new-message", {
     message: data.message,
     recipientId: body.recipientId,
     sender: data.sender,

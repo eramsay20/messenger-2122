@@ -31,32 +31,43 @@ const server = http.createServer(app);
 
 const io = require("socket.io")(server);
 
+io.use((socket, next) => {
+  const token = socket.handshake.auth.token;
+
+  if(token){
+    next()
+  } else {
+    next(new Error("invalid messengerToken"));
+  }
+});
+
 io.on("connection", (socket) => {
-  socket.on("go-online", (id) => {
-    socket.join(`user-${id}`)
-    if (!onlineUsers.includes(id)) {
-      onlineUsers.push(id);
-    }
-    // send the user who just went online to everyone else who is already online
-    socket.broadcast.emit("add-online-user", id);
-  });
 
-  socket.on("new-message", (data) => {
-    const { message, recipientId, sender} = data;
-  
-    socket.to(`user-${recipientId}`).emit("new-message", {
-      message: message,
-      sender: sender,
+    socket.on("go-online", (id) => {
+        socket.join(`user-${id}`)
+        if (!onlineUsers.includes(id)) onlineUsers.push(id);
+
+        // send the user who just went online to everyone else who is already online
+        socket.broadcast.emit("add-online-user", id);
     });
-  });
 
-  socket.on("logout", (id) => {
-    if (onlineUsers.includes(id)) {
-      userIndex = onlineUsers.indexOf(id);
-      onlineUsers.splice(userIndex, 1);
-      socket.broadcast.emit("remove-offline-user", id);
-    }
-  });
+    socket.on("new-message", (data) => {
+      const { message, recipientId, sender} = data;
+    
+      socket.to(`user-${recipientId}`).emit("new-message", {
+        message: message,
+        sender: sender,
+      });
+    });
+
+    socket.on("logout", (id) => {
+      if (onlineUsers.includes(id)) {
+        userIndex = onlineUsers.indexOf(id);
+        onlineUsers.splice(userIndex, 1);
+        socket.broadcast.emit("remove-offline-user", id);
+        socket.disconnect(true)
+      }
+    });
 });
 
 sessionStore
