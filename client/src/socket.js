@@ -13,7 +13,7 @@ export const initNewSocket = () => {
 
   const socket = io(window.location.origin, {
     auth: { token },
-    reconnectionDelayMax: 5000,
+    reconnectionDelayMin: 5000,
     transport: ['websocket']
   });
 

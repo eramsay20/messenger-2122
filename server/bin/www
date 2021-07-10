@@ -11,6 +11,7 @@ const { app, sessionStore } = require("../app");
 const http = require("http");
 const db = require("../db");
 const onlineUsers = require("../onlineUsers");
+var jwt = require('jsonwebtoken');
 
 /**
  * Get port from environment and store in Express.
@@ -33,11 +34,16 @@ const io = require("socket.io")(server);
 
 io.use((socket, next) => {
   const token = socket.handshake.auth.token;
-
   if(token){
-    next()
+    jwt.verify(token, process.env.SESSION_SECRET, (err, decoded) => {
+      if(err){
+        next(new Error("Invalid Token"))
+      } else {
+        next()
+      }
+    })
   } else {
-    next(new Error("invalid messengerToken"));
+    next(new Error("No Token Provided"));
   }
 });
 
