@@ -1,5 +1,4 @@
 import {
-  addNewConvoToStore,
   addOnlineUserToStore,
   addSearchedUsersToStore,
   removeOfflineUserFromStore,
@@ -15,7 +14,6 @@ const ADD_ONLINE_USER = "ADD_ONLINE_USER";
 const REMOVE_OFFLINE_USER = "REMOVE_OFFLINE_USER";
 const SET_SEARCHED_USERS = "SET_SEARCHED_USERS";
 const CLEAR_SEARCHED_USERS = "CLEAR_SEARCHED_USERS";
-const ADD_CONVERSATION = "ADD_CONVERSATION";
 const READ_UNREAD = "READ_UNREAD";
 
 // ACTION CREATORS
@@ -27,10 +25,10 @@ export const gotConversations = (conversations) => {
   };
 };
 
-export const setNewMessage = (message, sender) => {
+export const setNewMessage = (message, recipientId, sender) => {
   return {
     type: SET_MESSAGE,
-    payload: { message, sender: sender || null },
+    payload: { message, recipientId, sender: sender || null },
   };
 };
 
@@ -68,13 +66,6 @@ export const clearSearchedUsers = () => {
   };
 };
 
-// add new conversation when sending a new message
-export const addConversation = (recipientId, newMessage) => {
-  return {
-    type: ADD_CONVERSATION,
-    payload: { recipientId, newMessage },
-  };
-};
 
 // REDUCER
 
@@ -96,12 +87,6 @@ const reducer = (state = [], action) => {
       return state.filter((convo) => convo.id);
     case READ_UNREAD:
       return updateUnreadInStore(state, action.payload);
-    case ADD_CONVERSATION:
-      return addNewConvoToStore(
-        state,
-        action.payload.recipientId,
-        action.payload.newMessage
-      );
     default:
       return state;
   }
